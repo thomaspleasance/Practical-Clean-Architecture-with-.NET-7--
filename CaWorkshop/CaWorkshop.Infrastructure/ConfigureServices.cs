@@ -1,5 +1,8 @@
-﻿using CaWorkshop.Infrastructure.Identity;
+﻿using CaWorkshop.Application.Common.Interfaces;
+using CaWorkshop.Application.TodoLists.Queries.GetTodoLists;
 using CaWorkshop.Infrastructure.Data;
+using CaWorkshop.Infrastructure.Identity;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -16,9 +19,12 @@ public static class ConfigureServices
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlite(
                 configuration.GetConnectionString("DefaultConnection")));
-
+        
+        services.AddScoped<IApplicationDbContext>(provider =>
+            provider.GetRequiredService<ApplicationDbContext>());
+        
         services.AddScoped<ApplicationDbContextInitialiser>();
-
+        
         services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
