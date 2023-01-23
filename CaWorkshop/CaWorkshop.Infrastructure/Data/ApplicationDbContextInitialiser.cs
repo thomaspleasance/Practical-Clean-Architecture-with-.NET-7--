@@ -1,8 +1,6 @@
-﻿using CaWorkshop.WebUI.Models;
+﻿using CaWorkshop.Domain.Entities;
 
-using Microsoft.EntityFrameworkCore;
-
-namespace CaWorkshop.WebUI.Data;
+namespace CaWorkshop.Infrastructure.Data;
 
 public class ApplicationDbContextInitialiser
 {
@@ -13,7 +11,11 @@ public class ApplicationDbContextInitialiser
         _context = context;
     }
 
-    public void Initialise() => _context.Database.EnsureCreated();
+    public void Initialise()
+    {
+        _context.Database.EnsureDeleted();
+        _context.Database.EnsureCreated();
+    }
 
     public void Seed()
     {
