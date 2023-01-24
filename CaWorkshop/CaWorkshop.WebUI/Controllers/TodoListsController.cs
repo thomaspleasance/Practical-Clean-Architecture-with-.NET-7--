@@ -23,7 +23,7 @@ public class TodoListsController : ControllerBase
 
     // GET: api/TodoLists
     [HttpGet]
-    public async Task<ActionResult<TodosVm> GetTodoLists()
+    public async Task<ActionResult<TodosVm>> GetTodoLists()
     {
         return await _mediator.Send(new GetTodoListsQuery());
     }
