@@ -1,17 +1,8 @@
-using CaWorkshop.Infrastructure.Data;
-using CaWorkshop.Infrastructure.Identity;
-
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
-using Microsoft.EntityFrameworkCore;
 using CaWorkshop.Application;
 using CaWorkshop.Infrastructure;
-using CaWorkshop.Application.Common.Interfaces;
-using FluentValidation.AspNetCore;
-using FluentValidation;
+using CaWorkshop.Infrastructure.Data;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 
@@ -27,21 +18,22 @@ builder.Services.AddOpenApiDocument(configure =>
     configure.Title = "CaWorkshop API";
 });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 
 // Initialise and seed the database on start-up
-using (var scope = app.Services.CreateScope())
+using (IServiceScope scope = app.Services.CreateScope())
 {
     try
     {
-        var initialiser = scope.ServiceProvider.GetRequiredService<ApplicationDbContextInitialiser>();
+        ApplicationDbContextInitialiser initialiser =
+            scope.ServiceProvider.GetRequiredService<ApplicationDbContextInitialiser>();
         initialiser.Initialise();
         initialiser.Seed();
     }
     catch (Exception ex)
     {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        ILogger<Program> logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "An error occurred during database initialisation.");
 
         throw;
@@ -70,8 +62,8 @@ app.UseIdentityServer();
 app.UseAuthorization();
 
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller}/{action=Index}/{id?}");
+    "default",
+    "{controller}/{action=Index}/{id?}");
 app.MapRazorPages();
 
 app.MapFallbackToFile("index.html");
