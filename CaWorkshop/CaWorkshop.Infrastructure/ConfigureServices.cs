@@ -31,6 +31,8 @@ public static class ConfigureServices
         services.AddIdentityServer()
             .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
 
+        services.AddScoped<IIdentityService, IdentityService>();
+
         services.AddAuthentication()
             .AddIdentityServerJwt();
 

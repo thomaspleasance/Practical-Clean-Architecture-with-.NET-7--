@@ -1,11 +1,9 @@
 ﻿using System.Reflection;
-
 using CaWorkshop.Application.Common.Interfaces;
 using CaWorkshop.Domain.Entities;
 using CaWorkshop.Infrastructure.Identity;
-
+using CaWorkshop.Infrastructure.Data.Interceptors;
 using Duende.IdentityServer.EntityFramework.Options;
-
 using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -14,9 +12,29 @@ namespace CaWorkshop.Infrastructure.Data;
 
 public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>, IApplicationDbContext
 {
-    public ApplicationDbContext(DbContextOptions options, IOptions<OperationalStoreOptions> operationalStoreOptions)
+    private readonly AuditableEntitySaveChangesInterceptor _auditableEntitySaveChangesInterceptor;
+
+    public ApplicationDbContext(
+        DbContextOptions options,
+        IOptions<OperationalStoreOptions> operationalStoreOptions,
+        AuditableEntitySaveChangesInterceptor auditableEntitySaveChangesInterceptor)
         : base(options, operationalStoreOptions)
     {
+        _auditableEntitySaveChangesInterceptor = auditableEntitySaveChangesInterceptor;
+    }
+
+    public DbSet<TodoItem> TodoItems => Set<TodoItem>();
+
+    public DbSet<TodoList> TodoLists => Set<TodoList>();
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder
+            .LogTo(Console.WriteLine)
+            .EnableDetailedErrors()
+            .AddInterceptors(_auditableEntitySaveChangesInterceptor);
+
+        base.OnConfiguring(optionsBuilder);
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -26,18 +44,4 @@ public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>, 
         builder.ApplyConfigurationsFromAssembly(
             Assembly.GetExecutingAssembly());
     }
-    
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-#if DEBUG
-        optionsBuilder
-            .LogTo(Console.WriteLine)
-            .EnableDetailedErrors();
-#endif
-        base.OnConfiguring(optionsBuilder);
-    }
-
-    public DbSet<TodoItem> TodoItems => Set<TodoItem>();
-
-    public DbSet<TodoList> TodoLists => Set<TodoList>();
 }
