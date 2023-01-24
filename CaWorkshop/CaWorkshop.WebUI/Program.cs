@@ -1,13 +1,16 @@
 using CaWorkshop.Application;
 using CaWorkshop.Infrastructure;
 using CaWorkshop.Infrastructure.Data;
+using CaWorkshop.WebUI.Filters;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+    options.Filters.Add(new ApiExceptionFilterAttribute()));
+
 builder.Services.AddRazorPages();
 
 
